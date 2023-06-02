@@ -8,59 +8,17 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class App {
-    private static tsPacketCollector PAT;
+    private static tsPacketCollector _PAT;
     private static short pmt_pid = 0x7FFF;              // default 값 0x7FFF는 미설정 상태.
-    private static tsPacketCollector PMT;
+    private static tsPacketCollector _PMT;
     private static short dsmcc_addressable_pid = 0x7FFF;   // default 값 0x7FFF는 미설정 상태.
     private static tsPacketCollector DSMCC_addr;
-    private static tsPacketCollector tssBuf;
+//    private static tsPacketCollector tssBuf;
 
     public static void main(String[] args) {
-        tsPacket tsp;
-        byte[] tspacket_buf = new byte[188];
-        PAT = new tsPacketCollector((short)0);     // PAT PID=0
-        PAT.setOnPayloadUnitCompleteListener(new PayloadUnitCompleteListener() {
-            @Override
-            public void onComplete(PayloadUnitComplete event) {
-                byte[] patDump = PAT.getCompletedPayload();
-                System.out.println("PAT received.");
-                dump_byteArray(patDump);
-            }
-            @Override
-            public void onInvalidContinuity(PayloadUnitComplete event) {
-            }
-        });
 
-        if (pmt_pid!=0x7FFF) {       // PAT를 수신해서 pmt PID를 얻어 온 상태.
-            PMT = new tsPacketCollector((short) pmt_pid);
-            PMT.setOnPayloadUnitCompleteListener(new PayloadUnitCompleteListener() {
-                @Override
-                public void onComplete(PayloadUnitComplete event) {
-                    byte[] pmtDump = PMT.getCompletedPayload();
-                    System.out.println("PMT received.");
-                    dump_byteArray(pmtDump);
-                }
-                @Override
-                public void onInvalidContinuity(PayloadUnitComplete event) {
-                }
-            });
-        }
-
-        if (dsmcc_addressable_pid!=0x7FFF) {
-            DSMCC_addr = new tsPacketCollector(dsmcc_addressable_pid);
-            DSMCC_addr.setOnPayloadUnitCompleteListener(new PayloadUnitCompleteListener() {
-                @Override
-                public void onComplete(PayloadUnitComplete event) {
-                    byte[] dsmccAddr_Dump = DSMCC_addr.getCompletedPayload();
-                    System.out.println("PMT received.");
-                    dump_byteArray(dsmccAddr_Dump);
-                }
-                @Override
-                public void onInvalidContinuity(PayloadUnitComplete event) {
-                }
-            });
-        }
-
+        get_for_PAT();
+/*
         tssBuf = new tsPacketCollector((short)0x101);
         tssBuf.setOnPayloadUnitCompleteListener(new PayloadUnitCompleteListener() {
             @Override
@@ -82,21 +40,20 @@ public class App {
                 System.out.printf( "뭔가 잘못됐음. " );
             }
         } );
-
+*/
+        tsPacket tsp;
+        byte[] tspacket_buf = new byte[188];
         int read_bytes = 0;
         try {
             FileInputStream in = new FileInputStream("C:\\Users\\happy\\Downloads\\ts-sample-video\\ts.ts");
-//            FileInputStream in = new FileInputStream(args[1]);
-
             do {
+                get_for_PMT();
+                get_for_DSMCC_addressable();
+
                 read_bytes = in.read(tspacket_buf);
-                System.out.println("\n\n------ read TS Packet Dump. ------");
-                for (int i=0; i<tspacket_buf.length; i++) {
-                    System.out.printf( "%02X ", tspacket_buf[i] );
-                    if (i%30==29)
-                        System.out.printf("\n");
-                }
-                System.out.println("------");
+                System.out.printf("\nreceived TS Packet.......................\n");
+                dump_byteArray(tspacket_buf);
+
                 tsp = new tsPacket(tspacket_buf);
                 if (tsp.getTsErrorIndicator()) {
                     System.out.printf("\nTS Packet has Error !!: transport error indicator is %s", tsp.getTsErrorIndicator() ? "set" : "un-set");
@@ -106,7 +63,17 @@ public class App {
                     System.out.printf("\n         : adaptation= %s(%d), continuity counter=%d", (tsp.getAdaptationFieldControl() == 2) ? "adaptation field only. no payload." : (tsp.getAdaptationFieldControl() == 3) ? "adaptation field exist also payload." : (tsp.getAdaptationFieldControl() == 1) ? "No Adaption Field, only payload" : "Reserved for future. actually has some errors.",
                             tsp.getAdaptationFieldControl(), tsp.getContinuityCounter());
                     System.out.printf("\n         : adaptationFieldLength= %d", tsp.getAdaptationFieldLength());
-                    tssBuf.append_packet(tsp);
+                    if (pmt_pid==0x7FFF) {      // PAT를 아직 수신하지 않았다면,
+                        System.out.printf("\n[][] PAT 수신 대기중.. ");
+                        _PAT.append_packet(tsp);
+                    } else if (dsmcc_addressable_pid==0x7FFF) {     // PMT를 아직 수신하지 않았다면
+                        System.out.printf("\n[][] PMT 수신 대기중.. ");
+                        _PMT.append_packet(tsp);
+                    } else {
+                        System.out.printf("\n[][] DSMCC-addressable 수신 대기중.. ");
+                        DSMCC_addr.append_packet(tsp);
+                    }
+//                    tssBuf.append_packet(tsp);
 /*                    if (tsp.getPUSI()) {
                         System.out.println("\n---- old section_remained:");
                         byte[] old = tsp.getPayload();
@@ -142,6 +109,63 @@ public class App {
         }
     }
 
+    public static void get_for_PAT() {
+        _PAT = new tsPacketCollector((short) 0);     // PAT PID=0
+        _PAT.setOnPayloadUnitCompleteListener(new PayloadUnitCompleteListener() {
+            @Override
+            public void onComplete(PayloadUnitComplete event) {
+                byte[] patDump = _PAT.getCompletedPayload();
+                System.out.printf("======================  PAT received. : patDump =");
+//                dump_byteArray(patDump);
+                System.out.printf("...................... is PAT? = %s\n", (isPAT(patDump)) ? "YES" : "NO");
+                PAT_parse patTable = new PAT_parse(patDump);
+                pmt_pid = patTable.get_PMT_PID(0);
+                System.out.printf("\t>>>>>> PMT PID = %04X\n", pmt_pid );
+            }
+
+            @Override
+            public void onInvalidContinuity(PayloadUnitComplete event) {
+            }
+        });
+    }
+
+    public static void get_for_PMT() {
+        if (pmt_pid != 0x7FFF) {       // PAT를 수신해서 pmt PID를 얻어 온 상태.
+            System.out.printf("[][] TRACE #1.. pmt_pid= 0x%04X\n", pmt_pid);
+            _PMT = new tsPacketCollector((short) pmt_pid);
+            _PMT.setOnPayloadUnitCompleteListener(new PayloadUnitCompleteListener() {
+                @Override
+                public void onComplete(PayloadUnitComplete event) {
+                    byte[] pmtDump = _PMT.getCompletedPayload();
+                    System.out.println("====================== PMT received.");
+//                    dump_byteArray(pmtDump);
+                }
+
+                @Override
+                public void onInvalidContinuity(PayloadUnitComplete event) {
+                }
+            });
+        } else {
+            System.out.printf("[][] WARNING PMT_PID is not set yet.(0x%04X)\n", pmt_pid);
+        }
+    }
+
+    public static void get_for_DSMCC_addressable() {
+        if (dsmcc_addressable_pid!=0x7FFF) {
+            DSMCC_addr = new tsPacketCollector(dsmcc_addressable_pid);
+            DSMCC_addr.setOnPayloadUnitCompleteListener(new PayloadUnitCompleteListener() {
+                @Override
+                public void onComplete(PayloadUnitComplete event) {
+                    byte[] dsmccAddr_Dump = DSMCC_addr.getCompletedPayload();
+                    System.out.println("====================== DSMCC-addressable received.");
+                    dump_byteArray(dsmccAddr_Dump);
+                }
+                @Override
+                public void onInvalidContinuity(PayloadUnitComplete event) {
+                }
+            });
+        }
+    }
 
 /*
     만약 buffer 가 TS 패킷 버퍼가 아니거나, 188바이트 단위로 정렬되지 않은 상태라면,
@@ -167,12 +191,28 @@ public class App {
  */
 
     public static void dump_byteArray(byte[] payload) {
-        System.out.println(">>>>>>>>>> Dump payloads <<<<<<<<<");
+        System.out.println("\n>>>>>>>>>> Dump payloads >>>>>>>>>> ");
         for (int i=0; i<payload.length; i++) {
             System.out.printf( "%02X,", payload[i] );
             if (i%30==29)
                 System.out.printf("\n");
         }
-        System.out.println("\n>>>>>>>>>>> end of DUMP <<<<<<<<<<<");
+        System.out.println("\n<<<<<<<<<<< end of DUMP <<<<<<<<<<<");
+    }
+
+
+
+    public static boolean isPAT(byte[] buffer) {
+        if (buffer==null)
+            return false;
+//        if ( _PID != 0x00 )
+//            return false;
+        if ( buffer[0] != 0x00 )
+            return false;
+        return true;
+    }
+
+    public static void getPmtFromPat(byte[] pat_buffer) {
+
     }
 }

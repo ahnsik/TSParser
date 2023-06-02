@@ -36,19 +36,27 @@ public class tsPacket {
             _af = null;
         }
         if ((getAdaptationFieldControl() == 1) || (getAdaptationFieldControl() == 3)) {     // payload 가 있을 때에만.
+            System.out.printf("[][] TRACE..A [][] \n");
             if (getPUSI()) {        //
+                System.out.printf("[][] TRACE..C [][] \n");
                 int section_start_offset = buf[offset];
                 if (section_start_offset==0) {
-                    _payload = null;
+                    System.out.printf("[][] TRACE..E [][] makes payload null\n");
+                    _payload = Arrays.copyOfRange( buf, offset+section_start_offset+1, 188 );
+                    _nextSection_payload = null;
                 } else {
+                    System.out.printf("[][] TRACE..F [][] makes payload array copy\n");
                     _payload = Arrays.copyOfRange( buf, offset+1, offset+1+section_start_offset );
+                    _nextSection_payload = Arrays.copyOfRange( buf, offset+section_start_offset+1, 188 );
                 }
-                _nextSection_payload = Arrays.copyOfRange( buf, offset+section_start_offset+1, 188 );
             } else {
+                System.out.printf("[][] TRACE..D [][] \n");
                 System.out.printf("[][] check - Arrays.copyOfRange --> offset=%d, buf.length=%d\n", offset, buf.length);
                 _payload = Arrays.copyOfRange( buf, offset, 188);
                 _nextSection_payload = null;
             }
+        } else {
+            System.out.printf("[][] TRACE..B [][] \n");
         }
     }
 
@@ -91,15 +99,5 @@ public class tsPacket {
         if (_sync_byte != 0x47) return true;
         if ((_some_indicators & 0x80)!=0) return true;
         return false;
-    }
-
-    public boolean isPAT() {
-        if (_payload==null)
-            return false;
-        if ( _PID != 0x00 )
-            return false;
-        if ( _payload[0] != 0x00 )
-            return false;
-        return true;
     }
 }
