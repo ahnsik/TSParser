@@ -28,7 +28,6 @@ public class TsPacketCollector implements PayloadUnitCompleteListener {
     }
 
     public boolean append_packet(TsPacket packet) {
-        System.out.println("[] TRACE [] Section Collecting..");
         if ( packet.hasError() )
             return false;
         if ( packet.getPID() != _PID )
@@ -36,10 +35,8 @@ public class TsPacketCollector implements PayloadUnitCompleteListener {
         if ( (packet.getContinuityCounter()+1)%0x0F == _continuity_counter)
             this.onInvalidContinuity(new PayloadUnitComplete(this) );
         if (packet.getPUSI()) {
-            System.out.printf("[][] TRACE .. #2 - pusi is set. [][]\n" );
             byte[] packetBuff = packet.getPayload();
             if (packetBuff != null) {
-                System.out.printf("[][] TRACE .. #3 [][] \n" );
                 if (_payloadUnit != null) {
                     byte[] joinedArray;
                     System.out.printf("\npayloadUnit.length=%d, packetBuff.length=%d\n", _payloadUnit.length , packetBuff.length);
@@ -65,7 +62,7 @@ public class TsPacketCollector implements PayloadUnitCompleteListener {
                 System.out.println("new section 이 아닌데,  수집 중인 packet 이 아직 없다. - 무시할 것.");
                 return false;
             }
-            System.out.printf("[][] TRACE .. #1  collecting size=%d (section_len=%d) [][]\n", _payloadUnit.length, _section_len ); ;
+//            System.out.printf("[][] TRACE .. #1  collecting size=%d (section_len=%d) [][]\n", _payloadUnit.length, _section_len ); ;
             byte[] packetBuff = packet.getPayload();
             byte[] joinedArray = Arrays.copyOf(_payloadUnit, _payloadUnit.length + packetBuff.length);
             System.arraycopy(packetBuff, 0, joinedArray, _payloadUnit.length, packetBuff.length);
@@ -76,7 +73,7 @@ public class TsPacketCollector implements PayloadUnitCompleteListener {
                 this.onComplete(new PayloadUnitComplete(this), _completedPayload, _section_len );    // 이벤트리스너 호출
 //                dump_buffer(_completedPayload);
                 _payloadUnit = packet.getNewSectionPayload();
-                System.out.printf("\n[][] TRACE .. #4 [][] completed.length=%d\n", _completedPayload.length );
+//                System.out.printf("\n[][] TRACE .. #4 [][] completed.length=%d\n", _completedPayload.length );
                 if (_payloadUnit != null)
                     System.out.printf("\n[][] TRACE .. #5 new _payloadUnit.length=%d [][] \n", _payloadUnit.length );
             }

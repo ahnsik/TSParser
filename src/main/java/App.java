@@ -62,23 +62,24 @@ public class App {
                             int remainBytes = 0;
                             do {
                                 readBytes = inS.read(buff);
-                                System.out.printf("\nbyte read : %d. (remained:%d).\n", readBytes, (remainBytes = inS.available()) );
+                                remainBytes = inS.available();
+//                                System.out.printf("\nbyte read : %d. (remained:%d).\n", readBytes, remainBytes );
                                 // TsPacket 구조체로 분석한 후,
                                 TsPacket newPacket = new TsPacket(buff);
                                 //if (newPacket.getPID()==0x1FFF)
                                 //    continue;       // null packet 은 PASS.
-                                if ( (newPacket.getPID()==0x3E9) ||
-                                     (newPacket.getPID()==0x3EA) ||
-                                     (newPacket.getPID()==0x3EB) ||
-                                     (newPacket.getPID()==0x3ED) ) {         // DSMCC 면 Dump 해 본다.
-                                    if (parser.getPmtPid() != 0x7FFF) {      // PAT를 수신한 상태라면,
-                                        System.out.println("TsPacket Dump:");
-                                        for (int i=0; i<188; i++) {
-                                            System.out.printf("%02X ", buff[i]);
-                                        }
-                                        System.out.println(".");
-                                    }
-                                }
+//                                if ( (newPacket.getPID()==0x3E9) ||
+//                                     (newPacket.getPID()==0x3EA) ||
+//                                     (newPacket.getPID()==0x3EB) ||
+//                                     (newPacket.getPID()==0x3ED) ) {         // DSMCC 면 Dump 해 본다.
+//                                    if (parser.getPmtPid() != 0x7FFF) {      // PAT를 수신한 상태라면,
+//                                        System.out.println("TsPacket Dump:");
+//                                        for (int i=0; i<188; i++) {
+//                                            System.out.printf("%02X ", buff[i]);
+//                                        }
+//                                        System.out.println(".");
+//                                    }
+//                                }
                                 // packet Parser 에 던져 준다.
                                 parser.appendTsPacket(newPacket);
                             } while (remainBytes >= 188);

@@ -23,7 +23,6 @@ public class TsPacketParser {
 
     public void appendTsPacket(TsPacket tsp) {
         if (_pmt_pid == 0x7FFF) {           // PMT_PID 를 모른다 == PAT 를 받은 적이 없다. --> PAT를 수신해야 함.
-            //System.out.println(" Not ready. : PMT PID unknown. waiting PAT..");
             if (tsp.getPID() != 0x000) {    // PAT 가 아니므로 통과.
                 return;
             } else {                        // PAT를 수신했다면, parsing 하고 pmt_pid 를 설정할 것.
@@ -57,7 +56,7 @@ public class TsPacketParser {
                                 }
                                 System.out.printf("%02X ", data[i]);
                             }
-                            System.out.printf("\n==== End of Section Completed.===============================" );
+                            System.out.printf("\n==== End of Section Completed.===============================\n" );
                         }
                         @Override
                         public void onInvalidContinuity(PayloadUnitComplete event) {
@@ -75,26 +74,14 @@ public class TsPacketParser {
 //            System.out.printf(">>  this is NOT PMT table\n" );
         }
 
-//        // TODO: 본격적으로 DSMCC 패킷을 수집해 본다.
-//        System.out.printf("==== DSMCC packet dump [pid:0x%04X]========================\n", tsp.getPID() );
-//        for (int i=0; i<payload.length; i++) {
-//            System.out.printf(" %02X", payload[i]);
-//        }
-//        System.out.printf("\n==== end of DSMCC packet dump ===============\n");
-//        DsmccAddressable_parse parse = new DsmccAddressable_parse(payload);
-
         if (collector != null) {
             for (int i=0; i<collector.length; i++) {
-//            if ( collector[i]==null )     // 해당 PID가 DSMCC 가 아니다.
-//                continue;
                 if (tsp.getPID()==collector[i].getPID() ) {
-//                if (parse.get_data_byte()!=null) {
-//                    System.out.printf("DSMCC: payload append. %x\n", parse.get_data_byte() );
                     collector[i].append_packet( tsp );
-//                }
                 }
             }
         }
+
     }
 
 }
