@@ -12,6 +12,9 @@ public class TsPacket {
     private byte[] _nextSection_payload;
 
     public TsPacket(byte[] buf) {
+        _payload = null;
+        _nextSection_payload = null;
+
         _sync_byte = buf[0];
         if (_sync_byte != 0x47) {
             return;
@@ -24,7 +27,7 @@ public class TsPacket {
 //            return;
 //        }
         _PID = (short)((((buf[1]&0xFF)<<8)|(buf[2]&0xFF) )&0x1FFF);
-        System.out.printf("\n[][] check - TS Packet parsing _PID: %04x\n", _PID);
+//        System.out.printf("\n[][] check - TS Packet parsing _PID: %04x\n", _PID);
 
         _control_fields = buf[3];
         int offset = 4;
@@ -36,27 +39,24 @@ public class TsPacket {
             _af = null;
         }
         if ((getAdaptationFieldControl() == 1) || (getAdaptationFieldControl() == 3)) {     // payload 가 있을 때에만.
-//            System.out.printf("[][] TRACE..A [][] \n");
             if (getPUSI()) {        //
-                System.out.printf("[][] TRACE..C [][] \n");
                 int section_start_offset = buf[offset];
                 offset++;
                 if (section_start_offset==0) {
                     _payload = Arrays.copyOfRange( buf, offset+section_start_offset, 188 );
                     _nextSection_payload = null;
-                    System.out.printf("[][] TRACE..E [][] _payload = %d bytes\n", _payload.length);
+//                    System.out.printf("[][] TRACE..E [][] _payload = %d bytes\n", _payload.length);
                 } else {
                     _payload = Arrays.copyOfRange( buf, offset, offset+section_start_offset );
                     _nextSection_payload = Arrays.copyOfRange( buf, offset+section_start_offset, 188 );
 //                    System.out.printf("[][] TRACE..E [][] _payload = %d, _next = %d\n", _payload.length, _nextSection_payload.length);
                 }
             } else {
-                System.out.printf("[][] TRACE..D [][] \n");
-                System.out.printf("[][] no pusi. check - Arrays.copyOfRange --> offset=%d, buf.length=%d\n", offset, buf.length);
+//                System.out.printf("[][] no pusi. check - Arrays.copyOfRange --> offset=%d, buf.length=%d\n", offset, buf.length);
                 _payload = Arrays.copyOfRange( buf, offset, 188);
             }
         } else {
-            System.out.printf("[][] TRACE..B [][] \n");
+            System.out.printf("[][] TRACE..B -- no payload packet. (TsPacket) [][] \n");
         }
     }
 
@@ -99,10 +99,6 @@ public class TsPacket {
         if (_sync_byte != 0x47) return true;
         if ((_some_indicators & 0x80)!=0) return true;
         return false;
-    }
-
-    public short get_PID() {
-        return _PID;
     }
 
 }
