@@ -39,7 +39,7 @@ public class TsPacketCollector implements PayloadUnitCompleteListener {
             if (packetBuff != null) {
                 if (_payloadUnit != null) {
                     byte[] joinedArray;
-                    System.out.printf("\npayloadUnit.length=%d, packetBuff.length=%d\n", _payloadUnit.length , packetBuff.length);
+                    System.out.printf("\n payloadUnit.length=%d, packetBuff.length=%d\n", _payloadUnit.length , packetBuff.length);
                     joinedArray = Arrays.copyOf(_payloadUnit, _payloadUnit.length + packetBuff.length);
                     System.arraycopy(packetBuff, 0, joinedArray, _payloadUnit.length, packetBuff.length);
                     _payloadUnit = joinedArray;
@@ -52,17 +52,14 @@ public class TsPacketCollector implements PayloadUnitCompleteListener {
                 if (_payloadUnit.length >= _section_len) {
                     _completedPayload = _payloadUnit;       // 완성 버퍼로 옮겨 놓고,
                     this.onComplete(new PayloadUnitComplete(this), _completedPayload, _section_len);    // 이벤트리스너 호출
-//                    dump_buffer(_completedPayload);
                     _payloadUnit = packet.getNewSectionPayload();
-                    System.out.printf("\n[][] TRACE .. #4-1 (_payloadUnit=%X)[][] \n", _payloadUnit );
                 }
             }
         } else {        // there are No newSection_payload()
             if (_payloadUnit==null) {
-                System.out.println("new section 이 아닌데,  수집 중인 packet 이 아직 없다. - 무시할 것.");
+//                System.out.println("new section 이 아닌데,  수집 중인 packet 이 아직 없다. - 무시할 것.");
                 return false;
             }
-//            System.out.printf("[][] TRACE .. #1  collecting size=%d (section_len=%d) [][]\n", _payloadUnit.length, _section_len ); ;
             byte[] packetBuff = packet.getPayload();
             byte[] joinedArray = Arrays.copyOf(_payloadUnit, _payloadUnit.length + packetBuff.length);
             System.arraycopy(packetBuff, 0, joinedArray, _payloadUnit.length, packetBuff.length);
@@ -87,7 +84,7 @@ public class TsPacketCollector implements PayloadUnitCompleteListener {
     }
     @Override
     public void onComplete(PayloadUnitComplete event, byte[] data, int section_length) {
-        System.out.println(" Payload Unit is completed. : ");
+//        System.out.println(" Payload Unit is completed. : ");
         completelistener.onComplete(event, data, section_length);
     }
 

@@ -1,6 +1,17 @@
 package com.aircode.network.ts;
 
+import com.aircode.network.udp.packet.standard.DVBSTP_parse;
+import com.aircode.network.udp.packet.standard.DvbStpListener;
+import com.aircode.network.udp.packet.standard.packet.DvbStp;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.Arrays;
+
 public class TsPacketParser {
+
+    private DVBSTP_parse dvbstp_Parser;
+
     private static short _pmt_pid = 0x7FFF;              // default 값 0x7FFF는 미설정 상태.
     private static TsPacketCollector[] collector;
 
@@ -10,6 +21,92 @@ public class TsPacketParser {
     public TsPacketParser() {
         _pmt_pid = 0x7FFF;
         collector = null;
+        dvbstp_Parser = new DVBSTP_parse();
+        dvbstp_Parser.setDocumentReceivedListener(new DvbStpListener() {
+            @Override
+            public void onServiceProviderDiscoveryReceived(byte[] received_data) {
+                String xmlFilename = "ServiceProviderDiscovery.xml";
+                File xmlFile = new File( "./" + xmlFilename ) ;
+                System.out.println("write to (XML FileName):" + xmlFilename );
+                try (FileOutputStream outputStream = new FileOutputStream(xmlFile)) {
+                    outputStream.write( received_data );
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onLinearTVDiscoveryReceived(byte[] received_data) {
+                String xmlFilename = "LinearTVDiscovery.xml";
+                File xmlFile = new File( "./" + xmlFilename ) ;
+                System.out.println("write to (XML FileName):" + xmlFilename );
+                try (FileOutputStream outputStream = new FileOutputStream(xmlFile)) {
+                    outputStream.write( received_data );
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onContentGuideDiscoveryReceived(byte[] received_data) {
+                String xmlFilename = "ContentGuideDiscovery.xml";
+                File xmlFile = new File( "./" + xmlFilename ) ;
+                System.out.println("write to (XML FileName):" + xmlFilename );
+                try (FileOutputStream outputStream = new FileOutputStream(xmlFile)) {
+                    outputStream.write( received_data );
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onPackageDiscoveryReceived(byte[] received_data) {
+                String xmlFilename = "PackageDiscovery.xml";
+                File xmlFile = new File( "./" + xmlFilename ) ;
+                System.out.println("write to (XML FileName):" + xmlFilename );
+                try (FileOutputStream outputStream = new FileOutputStream(xmlFile)) {
+                    outputStream.write( received_data );
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onScheduleIndexDiscoveryReceived(byte[] received_data) {
+                String xmlFilename = "ScheduleIndexDiscovery.xml";
+                File xmlFile = new File( "./" + xmlFilename ) ;
+                System.out.println("write to (XML FileName):" + xmlFilename );
+                try (FileOutputStream outputStream = new FileOutputStream(xmlFile)) {
+                    outputStream.write( received_data );
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onScheduleDiscoveryReceived(byte[] received_data) {
+                String xmlFilename = "ScheduleDiscovery.xml";
+                File xmlFile = new File( "./" + xmlFilename ) ;
+                System.out.println("write to (XML FileName):" + xmlFilename );
+                try (FileOutputStream outputStream = new FileOutputStream(xmlFile)) {
+                    outputStream.write( received_data );
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onSystemTimeDiscoveryReceived(byte[] received_data) {
+                String xmlFilename = "SystemTimeDiscovery.xml";
+                File xmlFile = new File( "./" + xmlFilename ) ;
+                System.out.println("write to (XML FileName):" + xmlFilename );
+                try (FileOutputStream outputStream = new FileOutputStream(xmlFile)) {
+                    outputStream.write( received_data );
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     /** to Fast Collection :
@@ -49,14 +146,25 @@ public class TsPacketParser {
                     collector[i].setOnPayloadUnitCompleteListener(new PayloadUnitCompleteListener() {
                         @Override
                         public void onComplete(PayloadUnitComplete event, byte[] data, int section_length) {
-                            System.out.printf("\n==== Section Collection Completed. (length=%d / %d) ==============", section_length, data.length );
-                            for (int i=0; i<data.length; i++) {
-                                if (i%30==0) {
-                                    System.out.printf("\n\t");
-                                }
-                                System.out.printf("%02X ", data[i]);
+//                            System.out.printf("\n==== Section Collection Completed. (length=%d / %d) ==============", section_length, data.length );
+//                            for (int i=0; i<data.length; i++) {
+//                                if (i%30==0) {
+//                                    System.out.printf("\n\t");
+//                                }
+//                                System.out.printf("%02X ", data[i]);
+//                            }
+//                            System.out.printf("\n==== End of Section Completed.===============================\n" );
+//                            byte[] collected = Arrays.copyOfRange(data, 0, section_length+3);
+                            DsmccAddressable_parse dsmcc = new DsmccAddressable_parse(data);
+                            byte[] dvbstp_packet = dsmcc.get_data_byte();
+                            System.out.printf("\n==== Dvbstp bytes (%d bytes) ===============================\n", dvbstp_packet.length );
+                            for (int i=0; i<dvbstp_packet.length; i++) {
+                                System.out.printf("%02X ", dvbstp_packet[i]);
                             }
-                            System.out.printf("\n==== End of Section Completed.===============================\n" );
+                            System.out.printf("\n==== end of dvbstp. ===============================\n" );
+
+                            DvbStp parsing_data = new DvbStp( dvbstp_packet );
+                            dvbstp_Parser.append_data(parsing_data);
                         }
                         @Override
                         public void onInvalidContinuity(PayloadUnitComplete event) {

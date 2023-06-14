@@ -13,6 +13,7 @@ public class App {
 
     private static TsPacketParser parser;
 
+
     public static void main(String[] args) throws Exception {
 
         Logger logger = LogManager.getInstance().getLogger(App.class);
@@ -45,13 +46,14 @@ public class App {
                             }
                             continue;
                         }
-//                        System.out.printf("________ multicast_received_dataQueue (%d bytes) ________________", data.length );
-//                        for (int i=0; i<data.length; i++) {
-//                            if (i%47==0)
-//                                System.out.println("\t");
-//                            System.out.printf(" %02x", data[i] );
-//                        }
-//                        System.out.printf("\n^^^^^^^^ Until here. multicast received. ^^^^^^^^^^^^^^^^^^^^^^^^\n" );
+
+                        System.out.printf("________ multicast_received_dataQueue (%d bytes) ________________", data.length );
+                        for (int i=0; i<data.length; i++) {
+                            if (i%47==0)
+                                System.out.println("\t");
+                            System.out.printf(" %02x", data[i] );
+                        }
+                        System.out.printf("\n^^^^^^^^ Until here. multicast received. ^^^^^^^^^^^^^^^^^^^^^^^^\n" );
 
                         try {
                             // Multicast 로 부터 읽어 온 byteArray 를 InputStream 으로 만들고,

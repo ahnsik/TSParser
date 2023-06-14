@@ -45,18 +45,16 @@ public class TsPacket {
                 if (section_start_offset==0) {
                     _payload = Arrays.copyOfRange( buf, offset+section_start_offset, 188 );
                     _nextSection_payload = null;
-//                    System.out.printf("[][] TRACE..E [][] _payload = %d bytes\n", _payload.length);
                 } else {
                     _payload = Arrays.copyOfRange( buf, offset, offset+section_start_offset );
                     _nextSection_payload = Arrays.copyOfRange( buf, offset+section_start_offset, 188 );
-//                    System.out.printf("[][] TRACE..E [][] _payload = %d, _next = %d\n", _payload.length, _nextSection_payload.length);
                 }
             } else {
 //                System.out.printf("[][] no pusi. check - Arrays.copyOfRange --> offset=%d, buf.length=%d\n", offset, buf.length);
                 _payload = Arrays.copyOfRange( buf, offset, 188);
             }
-        } else {
-            System.out.printf("[][] TRACE..B -- no payload packet. (TsPacket) [][] \n");
+//        } else {
+//            System.out.printf("[][] TRACE..B -- no payload packet. (TsPacket) [][] \n");
         }
     }
 

@@ -77,12 +77,18 @@ public class Collector implements DocumentCompletedListener {
         _segmentVersion = packet.getSegmentVersion();
         _totalSegmentSize = packet.getTotalSegmentSize();
         _lastSectionNumber = packet.getLastSectionNumber();
+        System.out.printf(" [CHECK] New Collector - lastSectionNum : %d(0x%X)\n", _lastSectionNumber, _lastSectionNumber);
         _compressionType = packet.getCompression();
         _serviceProviderId = packet.getServiceProviderId();
         if (_payloads == null) {
             _payloads = new byte[_lastSectionNumber+1][];
         }
     }
+
+//    public void print_wierd_packet_header(DvbStp packet) {
+//        System.out.printf("[DVBSTP] version=%d(0x%02X), encryption=%d(0x%02X) \n", packet.getSegmentVersion(),);
+//        packet.getSegmentId()
+//    }
 
     public boolean append(DvbStp packet) {
         // Check this packet is suitable or not.
@@ -102,6 +108,7 @@ public class Collector implements DocumentCompletedListener {
         if (_segmentVersion!= packet.getSegmentVersion() ) {        // sectionVersion 이 안 맞으면 초기화
             onInvalidVersion(new DocumentCompleted(this, _payloadId, _segmentId, _segmentVersion) );    // 우선 Event로 알려 주고,
             // 몽땅 초기화 하고 새로 받아 옴.
+            System.out.printf(" [CHECK] DVBSTP packet lastSectionNum : old=%d(0x%X), new=%d(0x%x)\n", _lastSectionNumber, _lastSectionNumber, lastSectionNum, lastSectionNum);
             _lastSectionNumber = lastSectionNum;
             _sectionReceivedFlag = null;
             if (_payloads == null) {
@@ -123,7 +130,7 @@ public class Collector implements DocumentCompletedListener {
             return false;
         }
         if (sectionNum > lastSectionNum) {
-            System.out.printf(" [ERROR] DVBSTP packet is weird.: sectionNumber(%d) is bigger > than lastSectionNumber(%d) ! \n", sectionNum, lastSectionNum);
+            System.out.printf(" [ERROR] DVBSTP packet is weird.: sectionNumber(%d) is bigger > than lastSectionNumber(%d) ! \n", sectionNum, lastSectionNum );
             return false;
         }
         _payloads[sectionNum] = new byte[paylodOnly.length];
@@ -137,7 +144,7 @@ public class Collector implements DocumentCompletedListener {
 
         ///////////////// 완성되었는지 Check.
         if ( isCompleted() ) {
-            System.out.printf("하나의 Segment 완성. payloadId=%02X(%d), segmentID=%04X (version=%02x) \n", _payloadId, _payloadId, _segmentId, _segmentVersion );
+//            System.out.printf("A Segment completed. payloadId=%02X(%d), segmentID=%04X (version=%02x) \n", _payloadId, _payloadId, _segmentId, _segmentVersion );
             int packetCrc = packet.getCrc();
             if ( packetCrc!=-1 ) {
                 int calculatedCrc = calculateCRC();
