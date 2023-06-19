@@ -12,7 +12,15 @@ public class TsPacketParser {
 
     private DVBSTP_parse dvbstp_Parser;
 
-    private static short _pmt_pid = 0x7FFF;              // default 값 0x7FFF는 미설정 상태.
+    public void setDocumentReceivedListener(DvbStpListener custom_Listener) {
+        this.custom_DvbStpListener = custom_Listener;
+        dvbstp_Parser.setDocumentReceivedListener( this.custom_DvbStpListener );
+    }
+
+    private DvbStpListener custom_DvbStpListener;
+
+
+        private static short _pmt_pid = 0x7FFF;              // default 값 0x7FFF는 미설정 상태.
     private static TsPacketCollector[] collector;
 
     public short getPmtPid() {
@@ -22,7 +30,7 @@ public class TsPacketParser {
         _pmt_pid = 0x7FFF;
         collector = null;
         dvbstp_Parser = new DVBSTP_parse();
-        dvbstp_Parser.setDocumentReceivedListener(new DvbStpListener() {
+        custom_DvbStpListener = new DvbStpListener() {
             @Override
             public void onServiceProviderDiscoveryReceived(byte[] received_data) {
                 String xmlFilename = "ServiceProviderDiscovery.xml";
@@ -106,7 +114,8 @@ public class TsPacketParser {
                     e.printStackTrace();
                 }
             }
-        });
+        };
+        dvbstp_Parser.setDocumentReceivedListener( custom_DvbStpListener );
     }
 
     /** to Fast Collection :
@@ -120,6 +129,7 @@ public class TsPacketParser {
 
     public void appendTsPacket(TsPacket tsp) {
         if (_pmt_pid == 0x7FFF) {           // PMT_PID 를 모른다 == PAT 를 받은 적이 없다. --> PAT를 수신해야 함.
+//                    System.out.printf("[][] DEBUG [][] PMT not received yet. %x\n", _pmt_pid );
             if (tsp.getPID() != 0x000) {    // PAT 가 아니므로 통과.
                 return;
             } else {                        // PAT를 수신했다면, parsing 하고 pmt_pid 를 설정할 것.
@@ -133,10 +143,10 @@ public class TsPacketParser {
 
         byte[] payload = tsp.getPayload();
         // PMT를 수신 해서
-        if (payload[0] == 0x02) {       // PMT table 이면..
+        if ( tsp.isPMT() ) {       // if (payload[0] == 0x02) {       // PMT table 이면..           **** PMT 파싱하는 부분에 버그가 있는 듯 하다.
             PMT_parse pmt_parse = new PMT_parse(payload);
             int numPid = pmt_parse.get_number_of_PID();
-            System.out.printf(">> PMT received. ( %d pids exist)\n", numPid );
+//            System.out.printf(">> PMT received. ( %d pids exist)\n", numPid );
 
             if (collector==null) {
 //            System.out.printf(" Not ready. : DSMCC PID unknown. waiting PMT.. (PMT PID=%d (0x%04x))\n", _pmt_pid, _pmt_pid );
@@ -145,25 +155,17 @@ public class TsPacketParser {
                     collector[i] = new TsPacketCollector(pmt_parse.get_ElementPid(i));
                     collector[i].setOnPayloadUnitCompleteListener(new PayloadUnitCompleteListener() {
                         @Override
-                        public void onComplete(PayloadUnitComplete event, byte[] data, int section_length) {
-//                            System.out.printf("\n==== Section Collection Completed. (length=%d / %d) ==============", section_length, data.length );
-//                            for (int i=0; i<data.length; i++) {
-//                                if (i%30==0) {
-//                                    System.out.printf("\n\t");
-//                                }
-//                                System.out.printf("%02X ", data[i]);
-//                            }
-//                            System.out.printf("\n==== End of Section Completed.===============================\n" );
-//                            byte[] collected = Arrays.copyOfRange(data, 0, section_length+3);
+                        public void onComplete(PayloadUnitComplete event, byte[] data, int section_length, int received_PID) {
                             DsmccAddressable_parse dsmcc = new DsmccAddressable_parse(data);
                             byte[] dvbstp_packet = dsmcc.get_data_byte();
-                            System.out.printf("\n==== Dvbstp bytes (%d bytes) ===============================\n", dvbstp_packet.length );
-                            for (int i=0; i<dvbstp_packet.length; i++) {
-                                System.out.printf("%02X ", dvbstp_packet[i]);
-                            }
-                            System.out.printf("\n==== end of dvbstp. ===============================\n" );
+//                            System.out.printf("\n==== Dvbstp bytes (%d bytes) ===============================\n", dvbstp_packet.length );
+//                            for (int i=0; i<dvbstp_packet.length; i++) {
+//                                System.out.printf("%02X ", dvbstp_packet[i]);
+//                            }
+//                            System.out.printf("\n==== end of dvbstp. ===============================\n" );
 
                             DvbStp parsing_data = new DvbStp( dvbstp_packet );
+//                            System.out.printf("=>=>=> dvbstp packet: segment_version=%d, section_num=(%d of %d) ===============================\n",  parsing_data.getSegmentVersion(), parsing_data.getSectionNumber() ,parsing_data.getLastSectionNumber() );
                             dvbstp_Parser.append_data(parsing_data);
                         }
                         @Override

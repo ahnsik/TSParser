@@ -12,6 +12,7 @@ import java.util.zip.GZIPInputStream;
 public class Collector implements DocumentCompletedListener {
     private final byte _payloadId;
     private short _segmentId;
+    private short _latest_segmentVersion;
     private short _segmentVersion;
     private int _totalSegmentSize;
     private int _lastSectionNumber;
@@ -57,6 +58,7 @@ public class Collector implements DocumentCompletedListener {
         _crc = -1;
         _crc_checked = false;
         _sectionReceivedFlag = null;
+        _latest_segmentVersion = -1;
 //        listenerList = new EventListenerList();
 //        listener = new DocumentCompletedListener() {
 //            @Override
@@ -77,7 +79,7 @@ public class Collector implements DocumentCompletedListener {
         _segmentVersion = packet.getSegmentVersion();
         _totalSegmentSize = packet.getTotalSegmentSize();
         _lastSectionNumber = packet.getLastSectionNumber();
-        System.out.printf(" [CHECK] New Collector - lastSectionNum : %d(0x%X)\n", _lastSectionNumber, _lastSectionNumber);
+//        System.out.printf(" [CHECK] New Collector - lastSectionNum : %d(0x%X)\n", _lastSectionNumber, _lastSectionNumber);
         _compressionType = packet.getCompression();
         _serviceProviderId = packet.getServiceProviderId();
         if (_payloads == null) {
@@ -115,9 +117,13 @@ public class Collector implements DocumentCompletedListener {
                 _payloads = new byte[_lastSectionNumber+1][];
             }
         }
-        // 이미 완성된 상태라면, 새로 들어오는 패킷은 무시 ??
-        if ( isCompleted() ) {
-            return true;
+        // 같은 버전이 완성된 상태로 이미 존재하므로 패킷을 모으지 않고 버린다.
+        if (_latest_segmentVersion == _segmentVersion) {
+//            System.out.println("_segmentVersion is Same. wating for new version of Segment.");
+//            return true;      // TODO: 디버깅을 위해 우선 version 확인은 무시.
+        } else {
+//            System.out.printf("_latest_segmentVersion(%d) is not same with new version(%d.\n", _latest_segmentVersion,_segmentVersion );
+            _latest_segmentVersion = -1;
         }
 
         /* some Error checks */
@@ -137,7 +143,7 @@ public class Collector implements DocumentCompletedListener {
         System.arraycopy( paylodOnly, 0, _payloads[sectionNum], 0, paylodOnly.length );
 
         if (_sectionReceivedFlag==null) {
-            System.out.println(" No received sections. make new array" );
+//            System.out.println(" No received sections. make new array" );
             _sectionReceivedFlag = new boolean[lastSectionNum+1];
         }
         _sectionReceivedFlag[sectionNum] = true;
@@ -156,6 +162,7 @@ public class Collector implements DocumentCompletedListener {
                 }
             }
             // 완성되었음을 event 로 알려 줌.  onCompleted() 호출 될 것임.
+            _latest_segmentVersion = _segmentVersion;       // 완성된 버전을 기록해 둔다. - 중복되는 버전은 처리하지 않기 위함.
             fireCompletedEvent(new DocumentCompleted(this, _payloadId, _segmentId, _segmentVersion) );
         }
         return true;
@@ -221,7 +228,7 @@ public class Collector implements DocumentCompletedListener {
             CRC32 crc = new CRC32();
             crc.update(buffer);
             _crc = crc.getValue();
-            System.out.printf("[][] CRC32 calculated : %08X !! \n", _crc);
+//            System.out.printf("[][] CRC32 calculated : %08X !! \n", _crc);
         }
         return (int)_crc & 0xFFFFFFFF;
     }

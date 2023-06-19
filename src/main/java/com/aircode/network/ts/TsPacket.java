@@ -9,6 +9,7 @@ public class TsPacket {
     private byte _control_fields;
     private TsPacketAdaptationField _af;
     private byte[] _payload;
+    private int _num_payloadUnit;
     private byte[] _nextSection_payload;
 
     public TsPacket(byte[] buf) {
@@ -23,9 +24,24 @@ public class TsPacket {
             return;
         }
         _some_indicators = buf[1];
-//        if ((_some_indicators & 0x80)!=0) {
-//            return;
-//        }
+
+        if (getPUSI()) {
+            int count = 0;
+            int temp_len = 0;
+            int offset = 5+buf[4];
+            while (offset < buf.length-3) {
+                count++;
+                temp_len = ((buf[offset+1]&0x0F)<<8)|(buf[offset+2]&0xFF);
+                if (temp_len==0xFF)
+                    break;
+                offset += temp_len;
+            }
+            _num_payloadUnit = count;
+        } else {
+            _num_payloadUnit = 1;
+        }
+
+
         _PID = (short)((((buf[1]&0xFF)<<8)|(buf[2]&0xFF) )&0x1FFF);
 //        System.out.printf("\n[][] check - TS Packet parsing _PID: %04x\n", _PID);
 
@@ -58,8 +74,18 @@ public class TsPacket {
         }
     }
 
+    public boolean isPMT() {
+        if (getPUSI()) {
+            if (_payload[0] == 0x02)
+                return true;
+        }
+        return false;
+    }
     public boolean getTsErrorIndicator() {
         return ((_some_indicators & 0x80)!=0);
+    }
+    public int getNumPayloadUnit() {
+        return _num_payloadUnit;
     }
     public boolean getPUSI() {
         return ((_some_indicators & 0x40)!=0);
@@ -78,7 +104,7 @@ public class TsPacket {
         return _af.getLength();
     }
     public byte getContinuityCounter() {
-        return (byte) ((_control_fields>>4)&0x0F);
+        return (byte) (_control_fields&0x0F);
     }
 
     public short getPID() {

@@ -33,32 +33,32 @@ public class DVBSTP_parse  implements DvbStpListener{
     public void append_data(DvbStp data) {
         switch(data.getPayloadId()) {
             case 0x01:
-                System.out.printf("[][] -> DVBSTP Service Provider\n");
+//                System.out.printf("[][] -> DVBSTP Service Provider\n");
                 multiSegmentPacketCollect(ServiceProviderDiscovery, data);
                 break;
             case 0x02:
-                System.out.printf("[][] -> DVBSTP Service Linear\n");
+//                System.out.printf("[][] -> DVBSTP Service Linear\n");
                 multiSegmentPacketCollect(LinearTVDiscovery, data);
                 break;
             case 0x03:
-                System.out.printf("[][] -> DVBSTP Service Contents Guide\n");
+//                System.out.printf("[][] -> DVBSTP Service Contents Guide\n");
                 multiSegmentPacketCollect(ContentGuideDiscovery, data);
                 break;
             case 0x05:
-                System.out.printf("[][] -> DVBSTP Service Package\n");
+//                System.out.printf("[][] -> DVBSTP Service Package\n");
                 multiSegmentPacketCollect(PackageDiscovery, data);
                 break;
             case (byte) 0xA3:
-                System.out.printf("[][] -> DVBSTP Schedule\n");
+//                System.out.printf("[][] -> DVBSTP Schedule\n");
                 multiSegmentPacketCollect(ScheduleDiscovery, data);
                 break;
             case (byte) 0xA4:
-                System.out.printf("[][] -> DVBSTP Schedule Index\n");
+//                System.out.printf("[][] -> DVBSTP Schedule Index\n");
                 multiSegmentPacketCollect(ScheduleIndexDiscovery, data);
 
                 break;
             case (byte) 0xF0:
-                System.out.printf("[][] -> DVBSTP SystemTime\n");
+//                System.out.printf("[][] -> DVBSTP SystemTime\n");
                 multiSegmentPacketCollect(SystemTimeDiscovery, data);
                 break;
             default:
@@ -111,7 +111,7 @@ public class DVBSTP_parse  implements DvbStpListener{
     }
 
     public void do_payload_parse(Collector segment) {
-
+        System.out.printf(" do_payload_parse() payload_id= 0x%02X\n", segment.get_payloadId() );
         try {
             switch(segment.get_payloadId()) {
                 case (byte)0xA3:      // 만약, payload_id 가 0xA3 (Schedule) 이라면, CRI_container parsing 해야 함.

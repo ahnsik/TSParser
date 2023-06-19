@@ -69,7 +69,7 @@ public class PMT_parse {
             CRC32 crc = new CRC32();
             crc.update(buffer);
             crc_calc = (int) crc.getValue();
-            System.out.printf("[][] CRC32 calculated : %08X !! \n", crc_calc);
+//            System.out.printf("[][] CRC32 calculated : %08X !! \n", crc_calc);
         }
         return (int)crc_calc & 0xFFFFFFFF;
     }

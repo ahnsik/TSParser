@@ -4,7 +4,7 @@ import java.util.EventListener;
 
 public interface PayloadUnitCompleteListener extends EventListener {
 
-    void onComplete(PayloadUnitComplete event, byte[] data, int section_length);
+    void onComplete(PayloadUnitComplete event, byte[] data, int section_length, int pid);
     void onInvalidContinuity(PayloadUnitComplete event);
 }
 

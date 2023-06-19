@@ -55,13 +55,13 @@ public class DsmccAddressable_parse {
         _deviceId_47_40 = packetBuffer[11];
 //        int remain_len = packetBuffer.length -12-((_error_detection_type)?4:0);
         int _end_position = 3+_addressable_section_len;
-        System.out.printf("[][] _section_num=(%d/%d) [][] _payload_scrambling_control=%d, _address_scrambling_control=%d, \n", _section_num,_last_section_num, _payload_scrambling_control, _address_scrambling_control);
-        System.out.printf("_section_len = %d, _end_position = %d \n", _addressable_section_len, _end_position );
+//        System.out.printf("[][] _section_num=(%d/%d) [][] _payload_scrambling_control=%d, _address_scrambling_control=%d, \n", _section_num, _last_section_num, _payload_scrambling_control, _address_scrambling_control);
+//        System.out.printf("_section_len = %d, _end_position = %d \n", _addressable_section_len, _end_position );
         _data_byte = Arrays.copyOfRange(packetBuffer, 12, _end_position-4 );        // 12는 Header Size, -4 는 checksum 값 또는 CRC32.
 
         int offset = _end_position-4;
         _crc32 = (((packetBuffer[offset]&0xFF)<<24)|((packetBuffer[offset+1]&0xFF)<<16)|((packetBuffer[offset+2]&0xFF)<<8)|(packetBuffer[offset+3]&0xFF) );
-        System.out.printf("_crc32 position: %d CRC32=%08x\n", offset+3, _crc32 );
+//        System.out.printf("_crc32 position: %d CRC32=%08x\n", offset+3, _crc32 );
     }
 
     public byte[] get_data_byte() {
