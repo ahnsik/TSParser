@@ -82,7 +82,7 @@ public class DVBSTP_parse  implements DvbStpListener{
                 break;
             }
         }
-        if ( i >= collector.size() ) {
+        if ( i >= numOfCollector) {
             // 못 찾았다. 새로 생성
             lookup_segment = new Collector(packet_data.getPayloadId());
             Collector finalLookup_segment = lookup_segment;
@@ -90,6 +90,7 @@ public class DVBSTP_parse  implements DvbStpListener{
                 @Override
                 public void onComplete(DocumentCompleted event) {
                     // TODO: DVBSTP packet 을 모두 모아서 Segment 가 완성되었을 때 호출되는 함수. - 수신한 segment 를 저장하거나, parsing 하는 동작을 수행 ?
+//                    System.out.println("onComplete listener... "  );
                     do_payload_parse(finalLookup_segment);
                 }
                 @Override
@@ -111,7 +112,7 @@ public class DVBSTP_parse  implements DvbStpListener{
     }
 
     public void do_payload_parse(Collector segment) {
-        System.out.printf(" do_payload_parse() payload_id= 0x%02X\n", segment.get_payloadId() );
+//        System.out.printf(" do_payload_parse() payload_id= 0x%02X\n", segment.get_payloadId() );
         try {
             switch(segment.get_payloadId()) {
                 case (byte)0xA3:      // 만약, payload_id 가 0xA3 (Schedule) 이라면, CRI_container parsing 해야 함.

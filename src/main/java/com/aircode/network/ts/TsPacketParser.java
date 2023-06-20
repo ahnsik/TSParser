@@ -129,7 +129,7 @@ public class TsPacketParser {
 
     public void appendTsPacket(TsPacket tsp) {
         if (_pmt_pid == 0x7FFF) {           // PMT_PID 를 모른다 == PAT 를 받은 적이 없다. --> PAT를 수신해야 함.
-//                    System.out.printf("[][] DEBUG [][] PMT not received yet. %x\n", _pmt_pid );
+                    System.out.printf("[][] DEBUG [][] PMT not received yet. %x\n", _pmt_pid );
             if (tsp.getPID() != 0x000) {    // PAT 가 아니므로 통과.
                 return;
             } else {                        // PAT를 수신했다면, parsing 하고 pmt_pid 를 설정할 것.
@@ -158,14 +158,13 @@ public class TsPacketParser {
                         public void onComplete(PayloadUnitComplete event, byte[] data, int section_length, int received_PID) {
                             DsmccAddressable_parse dsmcc = new DsmccAddressable_parse(data);
                             byte[] dvbstp_packet = dsmcc.get_data_byte();
-//                            System.out.printf("\n==== Dvbstp bytes (%d bytes) ===============================\n", dvbstp_packet.length );
+//                            System.out.printf("\n==== Dvbstp(PID=%04X) bytes (%d bytes) ===============================\n", received_PID, dvbstp_packet.length );
 //                            for (int i=0; i<dvbstp_packet.length; i++) {
 //                                System.out.printf("%02X ", dvbstp_packet[i]);
 //                            }
 //                            System.out.printf("\n==== end of dvbstp. ===============================\n" );
-
                             DvbStp parsing_data = new DvbStp( dvbstp_packet );
-//                            System.out.printf("=>=>=> dvbstp packet: segment_version=%d, section_num=(%d of %d) ===============================\n",  parsing_data.getSegmentVersion(), parsing_data.getSectionNumber() ,parsing_data.getLastSectionNumber() );
+//                            System.out.printf("=>=>=> dvbstp packet: segment_version=%d, section_num=(%d of %d) ==============\n",  parsing_data.getSegmentVersion(), parsing_data.getSectionNumber() ,parsing_data.getLastSectionNumber() );
                             dvbstp_Parser.append_data(parsing_data);
                         }
                         @Override
@@ -177,6 +176,11 @@ public class TsPacketParser {
             } else {
                 if (collector.length == 0) {
                     System.out.printf("[WARNING][WARNING] collector.length is zero !! initializer weird.\n" );
+//                } else {
+//                    System.out.printf("PMT - TS packet collector is working for PID.. " );
+//                    for (int i=0; i<collector.length; i++)
+//                        System.out.printf("0x%04X,", collector[i].getPID() );
+//                    System.out.println(". " );
                 }
             }
             return;

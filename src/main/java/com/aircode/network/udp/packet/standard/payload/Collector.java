@@ -108,9 +108,10 @@ public class Collector implements DocumentCompletedListener {
         int lastSectionNum = packet.getLastSectionNumber();
 
         if (_segmentVersion!= packet.getSegmentVersion() ) {        // sectionVersion 이 안 맞으면 초기화
+            System.out.printf(" [CHECK] DVBSTP collector : segment Version invalid. old=%d(0x%X), new=%d(0x%x)\n", _segmentVersion,_segmentVersion,  packet.getSegmentVersion(),packet.getSegmentVersion() );
             onInvalidVersion(new DocumentCompleted(this, _payloadId, _segmentId, _segmentVersion) );    // 우선 Event로 알려 주고,
             // 몽땅 초기화 하고 새로 받아 옴.
-            System.out.printf(" [CHECK] DVBSTP packet lastSectionNum : old=%d(0x%X), new=%d(0x%x)\n", _lastSectionNumber, _lastSectionNumber, lastSectionNum, lastSectionNum);
+//            System.out.printf(" [CHECK] DVBSTP packet lastSectionNum : old=%d(0x%X), new=%d(0x%x)\n", _lastSectionNumber, _lastSectionNumber, lastSectionNum, lastSectionNum);
             _lastSectionNumber = lastSectionNum;
             _sectionReceivedFlag = null;
             if (_payloads == null) {
@@ -119,11 +120,11 @@ public class Collector implements DocumentCompletedListener {
         }
         // 같은 버전이 완성된 상태로 이미 존재하므로 패킷을 모으지 않고 버린다.
         if (_latest_segmentVersion == _segmentVersion) {
-//            System.out.println("_segmentVersion is Same. wating for new version of Segment.");
-//            return true;      // TODO: 디버깅을 위해 우선 version 확인은 무시.
-        } else {
+            System.out.printf("payload(0x%02X) _segmentVersion(%d(0x%02x)) is Same. wating for new version of Segment.\n", _payloadId, _segmentVersion, _segmentVersion );
+            return true;      // TODO: 디버깅을 위해 우선 version 확인은 무시.
+//        } else {
 //            System.out.printf("_latest_segmentVersion(%d) is not same with new version(%d.\n", _latest_segmentVersion,_segmentVersion );
-            _latest_segmentVersion = -1;
+//            _latest_segmentVersion = -1;
         }
 
         /* some Error checks */
@@ -168,23 +169,6 @@ public class Collector implements DocumentCompletedListener {
         return true;
     }
 
-    public void dump() {
-        if ( isCompleted() ) {
-            byte[] dumpBuff = this.getPayload();
-            System.out.printf(" ------ Payload (ID=%02X, segmentID=%02X): %d bytes ------------------\n", _payloadId, _segmentId, dumpBuff.length );
-            for (int i=0; i<dumpBuff.length; i++) {
-                if ( i%16==0 ) {
-                    System.out.printf("\n>\t");
-                }
-                System.out.printf("%02X,", dumpBuff[i]);
-            }
-            System.out.println("\n----------------------------- END of Buffer --");
-        } else {
-            System.out.printf(" !! Section colleced %d bytes. total %d of %d received.\n", bytesCollected(), bytesCollected(), _totalSegmentSize );
-            System.out.println(" !! Section collecting is not completed.");
-        }
-    }
-
     public boolean isEmpty() {
         if (_payloads == null)
             return true;
@@ -194,14 +178,21 @@ public class Collector implements DocumentCompletedListener {
     }
 
     public boolean isCompleted() {
-        if (_payloads==null)
+        if (_payloads==null) {
+            System.out.printf("[DVBSTP collector] _payloads array is null.\n" );
             return false;
-        if (_sectionReceivedFlag==null)
+        }
+        if (_sectionReceivedFlag==null) {
+            System.out.printf("[DVBSTP collector] _sectionReceivedFlag array is null.\n" );
             return false;
-        if (_payloads.length < 1)
+        }
+        if (_payloads.length < 1) {
+            System.out.printf("[DVBSTP collector] _payloads.length is 0 or under.\n" );
             return false;
+        }
         for (int i=0; i<_payloads.length; i++) {
             if ( !_sectionReceivedFlag[i] ) {
+//                System.out.printf("_payloadId=%04X, _section(%d of %d) is not received yet.\n", _payloadId,  i, _payloads.length-1 );
                 return false;
             }
         }

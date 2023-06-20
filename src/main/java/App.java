@@ -157,31 +157,13 @@ public class App {
                                 TsPacket newPacket = new TsPacket(buff);
 
 //                                if (newPacket.getPID()!=0x1FFF) {
-                                if (newPacket.getPID() == 0x03EA ) {        // Linear 만 뽑아 본다.
+////                                if ( (newPacket.getPID() == 0x03EA ) ) {            // && newPacket.getPUSI() ) {        // Linear 만 뽑아 본다. && PUSI가 1 인 것 만.
 //                                    System.out.printf("TS:\t");
-//                                    for (int i=0; i<188; i++) {
+//                                    for (int i=0; i<188; i++) {             // for (int i=0; i<4; i++) {    //
 //                                        System.out.printf("%02X ", buff[i]);
 //                                    }
 //                                    System.out.println(".");
-
-                                    if (((buff[0]&0xFF)==0x47)&&((buff[1]&0xFF)==0x43)&&((buff[2]&0xFF)==0xEA)) {
-                                        int sec_num = (((buff[25]&0xFF)<<4)|((buff[26]&0xF0)>>4));
-                                        int last_sec_num = (((buff[26]&0x0F)<<8)|((buff[27]&0xFF)));
-                                        System.out.printf(">>> Linear section_num Check. section_num=(%d / %d)\n", sec_num, last_sec_num );
-//                                    } else {
-//                                        System.out.printf(">>> Check. 0x%02X 0x%02X 0x%02X\n", (buff[0]&0xFF), (buff[1]&0xFF), (buff[2]&0xFF) );
-                                    }
-
-                                }
-//
-//                                if (newPacket.getPID() == 0x03EA ) {        // Linear 만 뽑아 본다.
-//                                    if ((buff[0]==0x47)&&(buff[1]==0x43)&&(buff[2]==0xEA)) {
-//                                        int sec_num = (((buff[25]&0xFF)<<4)|((buff[26]&0xF0)>>4));
-//                                        int last_sec_num = (((buff[26]&0x0F)<<4)|((buff[27]&0xFF)));
-//                                        System.out.printf(">>> Linear section_num Check. section_num=(%d / %d)\n", sec_num, last_sec_num );
-//                                    }
 //                                }
-
 
                                 // packet Parser 에 던져 준다.
                                 parser.appendTsPacket(newPacket);
@@ -194,15 +176,17 @@ public class App {
                 }
             }
         };
-        // -- DVBSTP packet parse
+        ////// -- DVBSTP packet parse
         // Thread rt = new Thread(new PacketReceiver("239.1.1.1", 15210, null, NetworkUtils.getNetworkInterfaceByIp(), uph), "PacketReceiverThread");
-        // -- MPEG-TS 수신
-        Thread rt_sdt = new Thread(new PacketReceiver("239.10.10.10", 14200, null, NetworkUtils.getNetworkInterfaceByIp(), uph), "PacketReceiverThread");
-        Thread ht_sdt = new Thread(uph, "PacketHandlerThread");
+        // rt.start();
+        // ht.start();
+        ////// -- MPEG-TS 수신
+        Thread rt_sdt = new Thread(new PacketReceiver("239.10.10.10", 14200, null, NetworkUtils.getNetworkInterfaceByIp(), uph), "PacketReceiverThread_SDT");
+        Thread ht_sdt = new Thread(uph, "PacketHandlerThread_SDT");
         rt_sdt.start();
         ht_sdt.start();
-        Thread rt_cg = new Thread(new PacketReceiver("239.10.10.11", 14200, null, NetworkUtils.getNetworkInterfaceByIp(), uph), "PacketReceiverThread");
-        Thread ht_cg = new Thread(uph, "PacketHandlerThread");
+        Thread rt_cg = new Thread(new PacketReceiver("239.10.10.11", 14200, null, NetworkUtils.getNetworkInterfaceByIp(), uph), "PacketReceiverThread_CG");
+        Thread ht_cg = new Thread(uph, "PacketHandlerThread_CG");
         rt_cg.start();
         ht_cg.start();
     }

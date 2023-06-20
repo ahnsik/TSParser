@@ -55,17 +55,15 @@ public class TsPacketCollector implements PayloadUnitCompleteListener {
                 }
 
                 if (_payloadUnit.length >= (_section_len+3) ) {
-                    /* _section_len(=1326)은 Table 의 Header 3바이트를 제외하고, CRC4바이트 포함한 길이,
-                    *  _payloadUnit.length 는 Header 포함, CRC 포함한 길이가 되므로,
-                    *  _section_len+3 의 값으로 비교해야 한다. */
-                    _completedPayload = Arrays.copyOf(_payloadUnit, _payloadUnit.length);                   // 완성 버퍼로 옮겨 놓고,
+                    _completedPayload = _payloadUnit;       // 완성 버퍼로 옮겨 놓고,
+//                    _completedPayload = Arrays.copyOf(_payloadUnit, _payloadUnit.length);                   // 완성 버퍼로 옮겨 놓고,
                     this.onComplete(new PayloadUnitComplete(this), _completedPayload, _section_len, _PID);    // 이벤트리스너 호출
                     // TODO: 1 개의 TS packet 에 여러개의 PayloadUnit 이 있는 경우에 대하여 고려하여  수정할 것.
-                    if ( packet.getNumPayloadUnit() > 1 ) {
-//                    _payloadUnit = packet.getNewSectionPayload();
-                    } else {
+//                    if ( packet.getNumPayloadUnit() > 1 ) {
+////                    _payloadUnit = packet.getNewSectionPayload();
+//                    } else {
                         _payloadUnit = null;
-                    }
+//                    }
 
                 }
             }
@@ -81,12 +79,9 @@ public class TsPacketCollector implements PayloadUnitCompleteListener {
             _payloadUnit = joinedArray;
 
             if (_payloadUnit.length >= (_section_len+3) ) {
-                /* _section_len(=1326)은 Table 의 Header 3바이트를 제외하고, CRC4바이트 포함한 길이,
-                 *  _payloadUnit.length 는 Header 포함, CRC 포함한 길이가 되므로,
-                 *  _section_len+3 의 값으로 비교해야 한다. */
                 _completedPayload = _payloadUnit;       // 완성 버퍼로 옮겨 놓고,
                 this.onComplete(new PayloadUnitComplete(this), _completedPayload, _section_len, _PID );    // 이벤트리스너 호출
-//                dump_buffer(_completedPayload);
+
                 _payloadUnit = packet.getNewSectionPayload();
 //                System.out.printf("\n[][] TRACE .. #4 [][] completed.length=%d\n", _completedPayload.length );
 //                if (_payloadUnit != null)
