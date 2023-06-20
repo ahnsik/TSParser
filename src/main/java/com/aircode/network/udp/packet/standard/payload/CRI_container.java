@@ -61,7 +61,9 @@ public class CRI_container {
 //                    catchFragmentIdAndWriteFile(  decompress(struct_body[i]) );
                     result_string = decompress(struct_body[i]);
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    System.out.printf("\n[ CAUTION ] exception - decompress failed !!! [ CAUTION ]\n"  );
+                    e.printStackTrace();
+                    //throw new RuntimeException(e);
                 }
             } else {
                 String filename = "container_type"+struct_type[i]+"_id"+struct_id[i]+"_len"+struct_len[i];

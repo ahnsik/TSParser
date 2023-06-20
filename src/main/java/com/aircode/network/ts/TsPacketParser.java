@@ -20,8 +20,8 @@ public class TsPacketParser {
     private DvbStpListener custom_DvbStpListener;
 
 
-        private static short _pmt_pid = 0x7FFF;              // default 값 0x7FFF는 미설정 상태.
-    private static TsPacketCollector[] collector;
+    private short _pmt_pid = 0x7FFF;              // default 값 0x7FFF는 미설정 상태.
+    private TsPacketCollector[] collector;
 
     public short getPmtPid() {
         return _pmt_pid;
@@ -123,19 +123,19 @@ public class TsPacketParser {
         parameter:
             pid     PMT_PID
      */
-    public static void set_pmt_pid(short pid) {
+    public void set_pmt_pid(short pid) {
         _pmt_pid = pid;
     }
 
     public void appendTsPacket(TsPacket tsp) {
         if (_pmt_pid == 0x7FFF) {           // PMT_PID 를 모른다 == PAT 를 받은 적이 없다. --> PAT를 수신해야 함.
-                    System.out.printf("[][] DEBUG [][] PMT not received yet. %x\n", _pmt_pid );
+            System.out.printf("[][] DEBUG [][] PMT not received yet. %x (%s)\n", _pmt_pid, "this="+this );
             if (tsp.getPID() != 0x000) {    // PAT 가 아니므로 통과.
                 return;
             } else {                        // PAT를 수신했다면, parsing 하고 pmt_pid 를 설정할 것.
                 PAT_parse _pat = new PAT_parse(tsp.getPayload());
                 _pmt_pid = _pat.get_PMT_PID(0);    // 첫번째 program 의 PID 를 그냥 가져와서 사용.
-                System.out.printf(">>  I GOT PAT : PMT PID is %d (0x%04x)\n", _pmt_pid, _pmt_pid);
+                System.out.printf(">>  I GOT PAT : PMT PID is %d (0x%04x) (%s)", _pmt_pid, _pmt_pid, "this="+this );
             }
 //        } else {
 //            System.out.printf("_pmt_pid = %x\n", _pmt_pid );
@@ -146,10 +146,8 @@ public class TsPacketParser {
         if ( tsp.isPMT() ) {       // if (payload[0] == 0x02) {       // PMT table 이면..           **** PMT 파싱하는 부분에 버그가 있는 듯 하다.
             PMT_parse pmt_parse = new PMT_parse(payload);
             int numPid = pmt_parse.get_number_of_PID();
-//            System.out.printf(">> PMT received. ( %d pids exist)\n", numPid );
 
             if (collector==null) {
-//            System.out.printf(" Not ready. : DSMCC PID unknown. waiting PMT.. (PMT PID=%d (0x%04x))\n", _pmt_pid, _pmt_pid );
                 collector = new TsPacketCollector[numPid];
                 for (int i=0; i<numPid; i++) {
                     collector[i] = new TsPacketCollector(pmt_parse.get_ElementPid(i));
@@ -169,7 +167,7 @@ public class TsPacketParser {
                         }
                         @Override
                         public void onInvalidContinuity(PayloadUnitComplete event) {
-                            System.out.printf("==== Section InvalidContinuity. ========================\n" );
+//                            System.out.printf("==== Section InvalidContinuity. ========================\n" );
                         }
                     });
                 }

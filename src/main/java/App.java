@@ -12,16 +12,14 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class App {
 
-    private static TsPacketParser parser;
-
-
     public static void main(String[] args) throws Exception {
 
         Logger logger = LogManager.getInstance().getLogger(App.class);
 
-        ConcurrentLinkedQueue<byte[]> dataQueue = new ConcurrentLinkedQueue<byte[]>();
-        boolean isRunningStatus = true;        
-        UdpPacketHandler uph = new UdpPacketHandler() {
+
+        boolean isRunningStatus = true;
+        class SDSPacketHandler implements UdpPacketHandler {
+            private ConcurrentLinkedQueue<byte[]> dataQueue = new ConcurrentLinkedQueue<byte[]>();
             public void onReceived(byte[] data) {
                 synchronized(dataQueue){
                     dataQueue.offer(data);
@@ -33,6 +31,7 @@ public class App {
             public void onRetryRequest(int retryCount) {}
             public void run () {
 
+                TsPacketParser parser;
                 parser = new TsPacketParser();
                 parser.setDocumentReceivedListener ( new DvbStpListener() {
                     @Override
@@ -176,17 +175,19 @@ public class App {
                 }
             }
         };
+        SDSPacketHandler uph1 = new SDSPacketHandler();
+        SDSPacketHandler uph2 = new SDSPacketHandler();
         ////// -- DVBSTP packet parse
         // Thread rt = new Thread(new PacketReceiver("239.1.1.1", 15210, null, NetworkUtils.getNetworkInterfaceByIp(), uph), "PacketReceiverThread");
         // rt.start();
         // ht.start();
         ////// -- MPEG-TS 수신
-        Thread rt_sdt = new Thread(new PacketReceiver("239.10.10.10", 14200, null, NetworkUtils.getNetworkInterfaceByIp(), uph), "PacketReceiverThread_SDT");
-        Thread ht_sdt = new Thread(uph, "PacketHandlerThread_SDT");
+        Thread rt_sdt = new Thread(new PacketReceiver("239.10.10.10", 14200, null, NetworkUtils.getNetworkInterfaceByIp(), uph1), "PacketReceiverThread_SDT");
+        Thread ht_sdt = new Thread(uph1, "PacketHandlerThread_SDT");
         rt_sdt.start();
         ht_sdt.start();
-        Thread rt_cg = new Thread(new PacketReceiver("239.10.10.11", 14200, null, NetworkUtils.getNetworkInterfaceByIp(), uph), "PacketReceiverThread_CG");
-        Thread ht_cg = new Thread(uph, "PacketHandlerThread_CG");
+        Thread rt_cg = new Thread(new PacketReceiver("239.10.10.11", 14200, null, NetworkUtils.getNetworkInterfaceByIp(), uph2), "PacketReceiverThread_CG");
+        Thread ht_cg = new Thread(uph2, "PacketHandlerThread_CG");
         rt_cg.start();
         ht_cg.start();
     }

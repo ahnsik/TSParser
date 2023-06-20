@@ -28,10 +28,14 @@ public class TsPacketCollector implements PayloadUnitCompleteListener {
     }
 
     public boolean append_packet(TsPacket packet) {
-        if ( packet.hasError() )
+        if ( packet.hasError() ) {
+            System.out.printf("\n[][][][] PID=0x%04X: packet.hasError() [][][][]\n", _PID );
             return false;
-        if ( packet.getPID() != _PID )
+        }
+        if ( packet.getPID() != _PID ) {
+            System.out.printf("\n[][][][] packet.getPID(=0x%04X) is not PID=0x%04X [][][][]\n", packet.getPID(), _PID );
             return false;
+        }
         if ( packet.getContinuityCounter() != ((_continuity_counter+1)&0x0F) ) {
             System.out.printf("\n[][][][] PID=0x%04X: continuity counter !! (new=%d, prev+1=%d) [][][][]\n\n", _PID, packet.getContinuityCounter(), (_continuity_counter+1)&0x0F );
             this.onInvalidContinuity(new PayloadUnitComplete(this));

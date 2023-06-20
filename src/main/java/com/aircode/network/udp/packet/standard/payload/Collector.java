@@ -192,7 +192,7 @@ public class Collector implements DocumentCompletedListener {
         }
         for (int i=0; i<_payloads.length; i++) {
             if ( !_sectionReceivedFlag[i] ) {
-//                System.out.printf("_payloadId=%04X, _section(%d of %d) is not received yet.\n", _payloadId,  i, _payloads.length-1 );
+                System.out.printf("_payloadId=%04X, _segment_id=0x%04X, _section(%d of %d) is not received yet.\n", _payloadId, _segmentId, i, _payloads.length-1 );
                 return false;
             }
         }
