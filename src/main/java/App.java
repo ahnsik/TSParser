@@ -168,7 +168,8 @@ public class App {
                                 parser.appendTsPacket(newPacket);
                             } while (remainBytes >= 188);
                         } catch (IOException e) {
-                            throw new RuntimeException(e);
+                            e.printStackTrace();
+//                            throw new RuntimeException(e);
                         }
 
                     }

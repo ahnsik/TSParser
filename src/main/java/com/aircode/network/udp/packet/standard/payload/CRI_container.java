@@ -66,13 +66,13 @@ public class CRI_container {
                     //throw new RuntimeException(e);
                 }
             } else {
-                String filename = "container_type"+struct_type[i]+"_id"+struct_id[i]+"_len"+struct_len[i];
+/*                String filename = "container_type"+struct_type[i]+"_id"+struct_id[i]+"_len"+struct_len[i];
                 File fileGz = new File( "./" + filename+".bin" ) ;
                 try (FileOutputStream gzFileOut = new FileOutputStream(fileGz)) {
                     gzFileOut.write( struct_body[i] );
                 } catch (Exception e){
                     e.printStackTrace();
-                }
+                }       */
             }
         }
     }

@@ -154,7 +154,8 @@ public class DVBSTP_parse  implements DvbStpListener{
             for (int j=0; j<100; j++) {
                 System.out.printf("%02X,", dump[j] );
             }
-            throw new RuntimeException(e);
+            e.printStackTrace();
+//            throw new RuntimeException(e);
         }
     }
 

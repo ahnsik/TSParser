@@ -73,7 +73,9 @@ public class Collector implements DocumentCompletedListener {
 
     public void setPropertiesFrom(DvbStp packet) {
         if (_payloadId != packet.getPayloadId()) {
-            throw new NullPointerException();
+//            throw new NullPointerException();
+            System.out.printf(" [Collector] payload_id mismatch !! (collector payload_id=0x%X, packet payload_id=0x%X)\n", _payloadId, packet.getPayloadId() );
+            return;
         }
         _segmentId = packet.getSegmentId();
         _segmentVersion = packet.getSegmentVersion();
@@ -225,39 +227,16 @@ public class Collector implements DocumentCompletedListener {
     }
 
     private void fireCompletedEvent(DocumentCompleted event) {
-//        Object[] listeners = listenerList.getListenerList();
-//        for (int i = listeners.length-2; i>=0; i-=2) {
-//            if (listeners[i] == DocumentCompletedListener.class) {
-//                ((DocumentCompletedListener)listeners[i+1]).onComplete(event);
-//            }
-//        }
         if (listener != null)
             listener.onComplete(event);
-
-//        ///////// 디버깅을 위해, 일단 file 로 저장해 놓는다..
-//        String filename = "pkt"+_payloadId+"_Segment"+_segmentId + ".section";
-//        File file = new File( "./" + filename ) ;
-//        // File fileGZ = new File( "./" + filename+".gz" );      // 이제 *.gz 파일을 저장할 필요는 없다.
-//        System.out.println("write to (FileName):" + filename );
-//        try (FileOutputStream outputStream = new FileOutputStream(file)) {
-//        //    FileOutputStream gzFileOut = new FileOutputStream(fileGZ);        // 압축해제 하지 않은, GZ형태를 그대로 저장한다면..
-//        //    gzFileOut.write( lookup_segment.getPayload() );                   // Payload 모은 것들을 그대로 파일로 저장함.
-//            outputStream.write( decompress(getPayload()) );
-//        } catch (Exception e){
-//            e.printStackTrace();
-//        }
-//        /////////// 여기까지. 디버깅을 위함
-
     }
 
     public void addCompletedEventListener(DocumentCompletedListener customListener) {
-//        listenerList.add(DocumentCompletedListener.class, listener);
         listener = customListener;
 
     }
 
     public void removeCompletedEventListener(DocumentCompletedListener customListener) {
-//        listenerList.remove(DocumentCompletedListener.class, listener);
         listener = null;
     }
 
@@ -266,71 +245,17 @@ public class Collector implements DocumentCompletedListener {
      */
     @Override
     public void onComplete(DocumentCompleted event) {
-
-/*        Object[] listeners = listenerList.getListenerList();
-
-        for (int i = listeners.length-2; i>=0; i-=2) {
-            if (listeners[i] == DocumentCompletedListener.class) {
-                ((DocumentCompletedListener)listeners[i+1]).onComplete(event);
-
-                switch(_payloadId) {
-                    case (byte)0xA3:      // 만약, payload_id 가 0xA3 (Schedule) 이라면, CRI_container parsing 해야 함.
-                        try {
-                            System.out.println("CRI_comtainer write.. 0xA3: container_parsing.." );
-                            CRI_container parser = new CRI_container( decompress( getPayload()) );
-                        } catch (IOException e) {
-                            System.out.println("[][] EXCEPTION when parse 0xA3.");
-                            byte[] dump = getPayload();
-                            for (int j=0; j<100; j++) {
-                                System.out.printf("%02X,", dump[j] );
-                            }
-                            throw new RuntimeException(e);
-                        }
-                        break;
-                    case (byte)0xA4:      // 아직 index Container 에 대해서는 분석이 필요하므로, 그냥 binary 로 저장.
-                        System.out.println("Payload ID 0xA4 is not descripted yet... Sorry." );
-                        //break;
-                    default:        // 그외의 경우엔 모두 GZ압축 풀어서 XML파일로 저장.
-                        String xmlFilename = "pkt"+_payloadId+"_Segment"+_segmentId;
-                        byte[] payload = getPayload();
-                        try {
-                            if (isCompressed(payload)) {        // 압축헤더를 찾으면 GZ 압축 풀고
-                                File xmlFile = new File( "./" + xmlFilename + ".xml" ) ;
-                                System.out.println("write to (XML FileName):" + xmlFilename );
-                                FileOutputStream outputStream = new FileOutputStream(xmlFile);
-                                outputStream.write(decompress(payload));
-                            } else {
-                                File xmlFile = new File( "./" + xmlFilename + ".bin" ) ;
-                                System.out.println("write to (binary FileName):" + xmlFilename );
-                                FileOutputStream outputStream = new FileOutputStream(xmlFile);
-                                outputStream.write( payload );
-                            }
-                        } catch (Exception e){
-                            e.printStackTrace();
-                        }
-                        break;
-                }
-
-            }
-        }
-*/
+        listener.onComplete(event);
     }
 
     @Override
     public void onInvalidVersion(DocumentCompleted event) {
         // DVBSTP 로 받아들인 패킷 데이터가, 현재 수집중인 Segment 와 버전이 맞지 않는다.
         // 이 경우엔, Collector 를 새롭게 초기화 해야 할 필요가 있다.
-//        Object[] listeners = listenerList.getListenerList();
-//
-//        for (int i = listeners.length-2; i>=0; i-=2) {
-//            if (listeners[i] == DocumentCompletedListener.class) {
-//                ((DocumentCompletedListener)listeners[i+1]).onInvalidVersion(event);
-//            }
-//        }
         listener.onInvalidVersion(event);
     }
 
-
+/*
     public static boolean isCompressed(final byte[] compressed) {
         return (compressed[0] == (byte) (GZIPInputStream.GZIP_MAGIC)) && (compressed[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> 8));
     }
@@ -355,7 +280,7 @@ public class Collector implements DocumentCompletedListener {
         }
         return outStr.toByteArray();
     }
-
+*/
 }
 
 
