@@ -35,23 +35,6 @@ public class DvbStp implements Packet{
 //                System.out.printf("%02X ", data[i]);
 //            }
 //        System.out.printf("\n==== End of.===============================\n" );
-    /*      잠시 백업.
-        int offset = 0;
-        byte reserved;
-        version = (byte)((data[offset] & 0b11000000) >> 6);
-        reserved =  (byte)((data[offset] & 0b00111000) >> 3);
-        encryption = (byte)((data[offset] & 0b00000110) >> 1);
-        crcFlag = (byte)(data[offset] & 0b00000001);
-        totalSegmentSize = ((data[++offset] & 0xFF) << 16) + ((data[++offset] & 0xFF) << 8) + (data[++offset] & 0xFF);
-        payloadId = (short)(data[++offset] & 0xFF);
-        segmentId = ((data[++offset] & 0xFF) << 8) + (data[++offset] & 0xFF);
-        segmentVersion = (short)(data[++offset] & 0xFF);
-        sectionNumber = (short)(((data[++offset] & 0xFF) << 4) + ((data[++offset] & 0xF0) >> 4));
-        lastSectionNumber = (short)(((data[offset] & 0x0F) << 4) + (data[++offset] & 0xFF));
-        compression = (byte)((data[++offset] & 0b11100000) >> 5);
-        providerIdFlag = (byte)((data[offset] & 0b00010000) >> 4);
-        privateHeaderLength = (byte)(data[offset] & 0x0F);
-     */
         byte reserved;
         version = (byte)((data[0]>>6)&0x03);
         reserved =  (byte)((data[0]>>3)&0x07);
@@ -108,7 +91,7 @@ public class DvbStp implements Packet{
     }
 
     public byte[] getPayload() {
-        return payload;
+        return getData();
     }
     public byte getPayloadId() {
         return (byte)payloadId;

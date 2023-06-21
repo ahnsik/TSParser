@@ -33,86 +33,86 @@ public class TsPacketParser {
         custom_DvbStpListener = new DvbStpListener() {
             @Override
             public void onServiceProviderDiscoveryReceived(byte[] received_data) {
-                String xmlFilename = "ServiceProviderDiscovery.xml";
-                File xmlFile = new File( "./" + xmlFilename ) ;
-                System.out.println("write to (XML FileName):" + xmlFilename );
-                try (FileOutputStream outputStream = new FileOutputStream(xmlFile)) {
-                    outputStream.write( received_data );
-                } catch (Exception e){
-                    e.printStackTrace();
-                }
+//                String xmlFilename = "ServiceProviderDiscovery.xml";
+//                File xmlFile = new File( "./" + xmlFilename ) ;
+//                System.out.println("write to (XML FileName):" + xmlFilename );
+//                try (FileOutputStream outputStream = new FileOutputStream(xmlFile)) {
+//                    outputStream.write( received_data );
+//                } catch (Exception e){
+//                    e.printStackTrace();
+//                }
             }
 
             @Override
             public void onLinearTVDiscoveryReceived(byte[] received_data) {
-                String xmlFilename = "LinearTVDiscovery.xml";
-                File xmlFile = new File( "./" + xmlFilename ) ;
-                System.out.println("write to (XML FileName):" + xmlFilename );
-                try (FileOutputStream outputStream = new FileOutputStream(xmlFile)) {
-                    outputStream.write( received_data );
-                } catch (Exception e){
-                    e.printStackTrace();
-                }
+//                String xmlFilename = "LinearTVDiscovery.xml";
+//                File xmlFile = new File( "./" + xmlFilename ) ;
+//                System.out.println("write to (XML FileName):" + xmlFilename );
+//                try (FileOutputStream outputStream = new FileOutputStream(xmlFile)) {
+//                    outputStream.write( received_data );
+//                } catch (Exception e){
+//                    e.printStackTrace();
+//                }
             }
 
             @Override
             public void onContentGuideDiscoveryReceived(byte[] received_data) {
-                String xmlFilename = "ContentGuideDiscovery.xml";
-                File xmlFile = new File( "./" + xmlFilename ) ;
-                System.out.println("write to (XML FileName):" + xmlFilename );
-                try (FileOutputStream outputStream = new FileOutputStream(xmlFile)) {
-                    outputStream.write( received_data );
-                } catch (Exception e){
-                    e.printStackTrace();
-                }
+//                String xmlFilename = "ContentGuideDiscovery.xml";
+//                File xmlFile = new File( "./" + xmlFilename ) ;
+//                System.out.println("write to (XML FileName):" + xmlFilename );
+//                try (FileOutputStream outputStream = new FileOutputStream(xmlFile)) {
+//                    outputStream.write( received_data );
+//                } catch (Exception e){
+//                    e.printStackTrace();
+//                }
             }
 
             @Override
             public void onPackageDiscoveryReceived(byte[] received_data) {
-                String xmlFilename = "PackageDiscovery.xml";
-                File xmlFile = new File( "./" + xmlFilename ) ;
-                System.out.println("write to (XML FileName):" + xmlFilename );
-                try (FileOutputStream outputStream = new FileOutputStream(xmlFile)) {
-                    outputStream.write( received_data );
-                } catch (Exception e){
-                    e.printStackTrace();
-                }
+//                String xmlFilename = "PackageDiscovery.xml";
+//                File xmlFile = new File( "./" + xmlFilename ) ;
+//                System.out.println("write to (XML FileName):" + xmlFilename );
+//                try (FileOutputStream outputStream = new FileOutputStream(xmlFile)) {
+//                    outputStream.write( received_data );
+//                } catch (Exception e){
+//                    e.printStackTrace();
+//                }
             }
 
             @Override
             public void onScheduleIndexDiscoveryReceived(byte[] received_data) {
-                String xmlFilename = "ScheduleIndexDiscovery.xml";
-                File xmlFile = new File( "./" + xmlFilename ) ;
-                System.out.println("write to (XML FileName):" + xmlFilename );
-                try (FileOutputStream outputStream = new FileOutputStream(xmlFile)) {
-                    outputStream.write( received_data );
-                } catch (Exception e){
-                    e.printStackTrace();
-                }
+//                String xmlFilename = "ScheduleIndexDiscovery.xml";
+//                File xmlFile = new File( "./" + xmlFilename ) ;
+//                System.out.println("write to (XML FileName):" + xmlFilename );
+//                try (FileOutputStream outputStream = new FileOutputStream(xmlFile)) {
+//                    outputStream.write( received_data );
+//                } catch (Exception e){
+//                    e.printStackTrace();
+//                }
             }
 
             @Override
             public void onScheduleDiscoveryReceived(byte[] received_data) {
-                String xmlFilename = "ScheduleDiscovery.xml";
-                File xmlFile = new File( "./" + xmlFilename ) ;
-                System.out.println("write to (XML FileName):" + xmlFilename );
-                try (FileOutputStream outputStream = new FileOutputStream(xmlFile)) {
-                    outputStream.write( received_data );
-                } catch (Exception e){
-                    e.printStackTrace();
-                }
+//                String xmlFilename = "ScheduleDiscovery.xml";
+//                File xmlFile = new File( "./" + xmlFilename ) ;
+//                System.out.println("write to (XML FileName):" + xmlFilename );
+//                try (FileOutputStream outputStream = new FileOutputStream(xmlFile)) {
+//                    outputStream.write( received_data );
+//                } catch (Exception e){
+//                    e.printStackTrace();
+//                }
             }
 
             @Override
             public void onSystemTimeDiscoveryReceived(byte[] received_data) {
-                String xmlFilename = "SystemTimeDiscovery.xml";
-                File xmlFile = new File( "./" + xmlFilename ) ;
-                System.out.println("write to (XML FileName):" + xmlFilename );
-                try (FileOutputStream outputStream = new FileOutputStream(xmlFile)) {
-                    outputStream.write( received_data );
-                } catch (Exception e){
-                    e.printStackTrace();
-                }
+//                String xmlFilename = "SystemTimeDiscovery.xml";
+//                File xmlFile = new File( "./" + xmlFilename ) ;
+//                System.out.println("write to (XML FileName):" + xmlFilename );
+//                try (FileOutputStream outputStream = new FileOutputStream(xmlFile)) {
+//                    outputStream.write( received_data );
+//                } catch (Exception e){
+//                    e.printStackTrace();
+//                }
             }
         };
         dvbstp_Parser.setDocumentReceivedListener( custom_DvbStpListener );

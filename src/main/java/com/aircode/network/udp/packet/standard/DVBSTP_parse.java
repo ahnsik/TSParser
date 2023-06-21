@@ -138,14 +138,15 @@ public class DVBSTP_parse  implements DvbStpListener{
                     break;
 
                 default:        // 그외의 경우엔 모두 GZ압축 풀어서 XML파일로 저장.
-                    String xmlFilename = "pkt"+segment.get_payloadId()+"_Segment"+segment.get_segmentId() + ".xml";
-                    File xmlFile = new File( "./" + xmlFilename ) ;
-                    System.out.println("write to (XML FileName):" + xmlFilename );
-                    try (FileOutputStream outputStream = new FileOutputStream(xmlFile)) {
-                        outputStream.write( decompress(segment.getPayload()) );
-                    } catch (Exception e){
-                        e.printStackTrace();
-                    }
+                    System.out.printf("\n[][WARNING][] UNKNOWN DvbStp Payload_ID. _payload_id=0x%X, segment_id=0x%X \n", segment.get_payloadId(), segment.get_segmentId());
+//                    String xmlFilename = "pkt"+segment.get_payloadId()+"_Segment"+segment.get_segmentId() + ".xml";
+//                    File xmlFile = new File( "./" + xmlFilename ) ;
+//                    System.out.println("write to (XML FileName):" + xmlFilename );
+//                    try (FileOutputStream outputStream = new FileOutputStream(xmlFile)) {
+//                        outputStream.write( decompress(segment.getPayload()) );
+//                    } catch (Exception e){
+//                        e.printStackTrace();
+//                    }
                     break;
             }
         } catch (IOException e) {

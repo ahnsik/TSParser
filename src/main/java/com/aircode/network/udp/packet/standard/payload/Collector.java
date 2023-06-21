@@ -86,6 +86,7 @@ public class Collector implements DocumentCompletedListener {
         _serviceProviderId = packet.getServiceProviderId();
         if (_payloads == null) {
             _payloads = new byte[_lastSectionNumber+1][];
+            _sectionReceivedFlag = new boolean[_lastSectionNumber+1];
         }
     }
 
@@ -110,15 +111,20 @@ public class Collector implements DocumentCompletedListener {
         int lastSectionNum = packet.getLastSectionNumber();
 
         if (_segmentVersion!= packet.getSegmentVersion() ) {        // sectionVersion 이 안 맞으면 초기화
-            System.out.printf(" [CHECK] DVBSTP collector : segment Version invalid. old=%d(0x%X), new=%d(0x%x)\n", _segmentVersion,_segmentVersion,  packet.getSegmentVersion(),packet.getSegmentVersion() );
+            System.out.printf(" [CHECK] DVBSTP collector : segment Version invalid. old=%d(0x%X), new=%d(0x%x), lastSectionNum=%d\n", _segmentVersion,_segmentVersion,  packet.getSegmentVersion(),packet.getSegmentVersion(), lastSectionNum );
             onInvalidVersion(new DocumentCompleted(this, _payloadId, _segmentId, _segmentVersion) );    // 우선 Event로 알려 주고,
             // 몽땅 초기화 하고 새로 받아 옴.
 //            System.out.printf(" [CHECK] DVBSTP packet lastSectionNum : old=%d(0x%X), new=%d(0x%x)\n", _lastSectionNumber, _lastSectionNumber, lastSectionNum, lastSectionNum);
+            _segmentVersion = packet.getSegmentVersion();
+            _totalSegmentSize = packet.getTotalSegmentSize();
             _lastSectionNumber = lastSectionNum;
+            _compressionType = packet.getCompression();
+            _serviceProviderId = packet.getServiceProviderId();
             _sectionReceivedFlag = null;
-            if (_payloads == null) {
-                _payloads = new byte[_lastSectionNumber+1][];
-            }
+            _payloads = new byte[_lastSectionNumber+1][];
+            _sectionReceivedFlag = new boolean[lastSectionNum+1];
+        } else {
+            System.out.printf(" [CHECK] DVBSTP collector : _segmentVersion is same. go ahead. (lastSectionNum is %d)\n", lastSectionNum );
         }
         // 같은 버전이 완성된 상태로 이미 존재하므로 패킷을 모으지 않고 버린다.
         if (_latest_segmentVersion == _segmentVersion) {
@@ -161,6 +167,7 @@ public class Collector implements DocumentCompletedListener {
                     System.out.printf("[][] ERROR !! [][] CRC does not matched !.... (Calculated:%08X != inPacket:%08X) \n", calculatedCrc, packetCrc);
                     System.out.print("[][]   need to clear Collector to restart again.\n");
                 } else {    // CRC check 까지 완료됨.
+//                    System.out.print("[][] DVBSTP Collector: CRC checked OK.\n");
                     set_crc_checked(true);
                 }
             }
